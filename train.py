@@ -5,6 +5,8 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 import torchvision
 import platform
+import os
+from model import Net
 
 
 if platform.system() == "Darwin": # use gpu on mac
@@ -26,28 +28,6 @@ test_dataset = torchvision.datasets.MNIST(root='./data',train=False,transform=tr
 train_loader = torch.utils.data.DataLoader(dataset=train_dataset,batch_size=BATCH_SIZE, shuffle=True)
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset,batch_size=BATCH_SIZE,shuffle=False)
 
-
-class Net(nn.Module):
-    def __init__(self):
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, 3, padding=1)
-        self.pool1 = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)
-        self.pool2 = nn.MaxPool2d(2, 2)
-        self.conv3 = nn.Conv2d(64, 128, 3, padding=1)
-        self.pool3 = nn.MaxPool2d(2, 2)
-
-        self.fc1 = nn.Linear(128 * 3 * 3, 625)
-        self.fc2 = nn.Linear(625, 10)
-
-    def forward(self, x):
-        x = self.pool1(F.relu(self.conv1(x)))
-        x = self.pool2(F.relu(self.conv2(x)))
-        x = self.pool3(F.relu(self.conv3(x)))
-        x = x.view(-1, 128 * 3 * 3)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
 
 net = Net().to(device)
 criterion = nn.CrossEntropyLoss()
@@ -79,4 +59,6 @@ for epoch in range(NUM_EPOCHS):
         print(f'Epoch {epoch+1}, Loss: {total_loss}, Accuracy: {100 * correct / len(train_dataset)}')
 
 # save model
+if 'output' not in os.listdir():
+    os.mkdir('output')
 torch.save(net.state_dict(), "output/mnist_cnn.pt")
