@@ -4,14 +4,15 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torchvision import datasets, transforms
 import torchvision
+import platform
 
 
-# use gpu on mac
-# device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
-# use gpu on linux / windows
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if platform.system() == "Darwin": # use gpu on mac
+    device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+else: # use gpu on linux / windows
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
-NUM_EPOCHS = 1000
+NUM_EPOCHS = 100
 transform = transforms.Compose(
 [transforms.ToTensor(),
 transforms.Normalize((0.1307),(0.3081))
