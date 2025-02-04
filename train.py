@@ -7,9 +7,9 @@ import torchvision
 
 
 # use gpu on mac
-device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+# device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 # use gpu on linux / windows
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
 NUM_EPOCHS = 1000
 transform = transforms.Compose(
@@ -18,7 +18,7 @@ transforms.Normalize((0.1307),(0.3081))
 ])
 
 # Data set
-train_dataset = torchvision.datasets.MNIST(root='./data',train=True,transform=transforms.ToTensor())
+train_dataset = torchvision.datasets.MNIST(root='./data',train=True,transform=transforms.ToTensor(),download=True)
 test_dataset = torchvision.datasets.MNIST(root='./data',train=False,transform=transforms.ToTensor())
 
 # Data loader
@@ -74,7 +74,8 @@ for epoch in range(NUM_EPOCHS):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    print(f'Epoch {epoch+1}, Loss: {total_loss}, Accuracy: {100 * correct / len(train_dataset)}')
+    if (epoch+1) % 10 == 0:
+        print(f'Epoch {epoch+1}, Loss: {total_loss}, Accuracy: {100 * correct / len(train_dataset)}')
 
 # save model
-torch.save(net.state_dict(), "mnist_cnn.pt")
+torch.save(net.state_dict(), "output/mnist_cnn.pt")
