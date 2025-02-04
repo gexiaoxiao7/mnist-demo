@@ -2,24 +2,49 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class Net(nn.Module):
+class ConvNet(nn.Module):
     def __init__(self):
-        super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, 3, padding=1)
-        self.pool1 = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(32, 64, 3, padding=1)
-        self.pool2 = nn.MaxPool2d(2, 2)
-        self.conv3 = nn.Conv2d(64, 128, 3, padding=1)
-        self.pool3 = nn.MaxPool2d(2, 2)
+        super(ConvNet, self).__init__()
+        # 提取特征层
+        self.features = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(num_features=32),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(inplace=True),
 
-        self.fc1 = nn.Linear(128 * 3 * 3, 625)
-        self.fc2 = nn.Linear(625, 10)
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
 
+        self.classifier = nn.Sequential(
+            # Dropout层
+            # p = 0.5 代表该层的每个权重有0.5的可能性为0
+            nn.Dropout(p=0.5),
+            # 这里是通道数64 * 图像大小7 * 7，然后输入到512个神经元中
+            nn.Linear(64 * 7 * 7, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=0.5),
+            nn.Linear(512, 512),
+            nn.BatchNorm1d(512),
+            nn.ReLU(inplace=True),
+            nn.Dropout(p=0.5),
+            nn.Linear(512, 10),
+        )
+
+    # 前向传递函数
     def forward(self, x):
-        x = self.pool1(F.relu(self.conv1(x)))
-        x = self.pool2(F.relu(self.conv2(x)))
-        x = self.pool3(F.relu(self.conv3(x)))
-        x = x.view(-1, 128 * 3 * 3)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
+        # 经过特征提取层
+        x = self.features(x)
+        # 输出结果必须展平成一维向量
+        x = x.view(x.size(0), -1)
+        x = self.classifier(x)
         return x

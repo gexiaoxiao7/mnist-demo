@@ -6,7 +6,7 @@ from torchvision import datasets, transforms
 import torchvision
 import platform
 import os
-from model import Net
+from model import ConvNet
 
 
 if platform.system() == "Darwin": # use gpu on mac
@@ -29,7 +29,7 @@ train_loader = torch.utils.data.DataLoader(dataset=train_dataset,batch_size=BATC
 test_loader = torch.utils.data.DataLoader(dataset=test_dataset,batch_size=BATCH_SIZE,shuffle=False)
 
 
-net = Net().to(device)
+net = ConvNet().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(),lr=1e-3,momentum = 0.9)
 

@@ -3,12 +3,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
-from model import Net
+from model import ConvNet
 
 
 # Load the model
 device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
-model = Net().to(device)
+model = ConvNet().to(device)
 model.load_state_dict(torch.load("output/mnist_cnn.pt", map_location=device))
 model.eval()
 
